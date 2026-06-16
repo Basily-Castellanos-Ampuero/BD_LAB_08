@@ -1,0 +1,19 @@
+# Credenciales — nunca subir al repositorio
+db.properties
+
+# Archivos de Claude Code
+.claude/
+
+# Clases compiladas de Java
+*.class
+
+# Archivos comprimidos innecesarios
+*.zip
+
+# IDEs
+.idea/
+*.iml
+nbproject/
+.settings/
+*.project
+*.classpath
