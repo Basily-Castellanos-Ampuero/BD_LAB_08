@@ -22,7 +22,6 @@ public class CrudApp extends JFrame {
 
     // ============================================================
     //  CONFIGURACIÓN DE BASE DE DATOS
-    //  Copia "db.properties.example" -> "db.properties" y llénalo.
     // ============================================================
     private static final String DB_URL;
     private static final String DB_USER;
