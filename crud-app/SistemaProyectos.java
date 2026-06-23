@@ -4,35 +4,30 @@ import javax.swing.event.*;
 import javax.swing.table.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.*;
+import java.sql.Date;
 import java.util.*;
 import java.util.List;
 
-/**
- * Sistema de Gestión de Proyectos – BD26A / UNSA
- * Arquitectura: Panel Maestro-Detalle con jerarquía de tablas
- *   Referenciales → Maestras → Transacciones
- */
 public class SistemaProyectos extends JFrame {
-
-    // ─── Conexión ───────────────────────────────────────────────────
-    private static final String DB_URL;
-    private static final String DB_USER;
-    private static final String DB_PASS;
-    static {
-        java.util.Properties p = new java.util.Properties();
-        for (String ruta : new String[]{"db.properties", "../db.properties"}) {
-            try (java.io.FileInputStream f = new java.io.FileInputStream(ruta)) {
-                p.load(f); break;
-            } catch (java.io.IOException ignored) {}
+    private Connection getConnection() throws SQLException {
+        Properties props = new Properties();
+        try (FileInputStream fis = new FileInputStream("db.properties")) {
+            props.load(fis);
+        } catch (IOException e) {
+            throw new SQLException("No se pudo leer db.properties: " + e.getMessage());
         }
-        DB_URL  = p.getProperty("db.url",  "jdbc:mysql://localhost:3306/control_proyectos?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true");
-        DB_USER = p.getProperty("db.user", "root");
-        DB_PASS = p.getProperty("db.pass", "");
+
+        String url = props.getProperty("db.url");
+        String user = props.getProperty("db.user");
+        String password = props.getProperty("db.password");
+
+        return DriverManager.getConnection(url, user, password);
     }
 
-    // ─── Paleta de colores ───────────────────────────────────────────
     private static final Color C_SIDEBAR_BG  = new Color(248, 249, 250);
     private static final Color C_TOPBAR_BG   = new Color(255, 255, 255);
     private static final Color C_HEADER_BG   = new Color(245, 247, 249);
@@ -63,38 +58,38 @@ public class SistemaProyectos extends JFrame {
         }
     }
 
-    // Catálogo de tablas del sistema (adaptar a BD real)
     private static final TablaConfig[] CATALOGO = {
         // Referenciales
-        new TablaConfig("tip_cli",  "Tipos Cliente",   "GZZ_TIP_CLI",    "Referencial", null,      null),
-        new TablaConfig("tip_pro",  "Tipos Proyecto",  "GZZ_TIP_PRO",    "Referencial", null,      null),
-        new TablaConfig("cargos",   "Cargos",          "GZZ_CARGOS",     "Referencial", null,      null),
-        new TablaConfig("estados",  "Estados",         "GZZ_ESTADOS",    "Referencial", null,      null),
+        new TablaConfig("est_reg", "Estados Registro",   "GZZ_EST_REG", "Referencial", null, null),
+        new TablaConfig("tip_cli", "Tipos Cliente",      "GZZ_TIP_CLI", "Referencial", "est_reg", "TipCliEstReg"),
+        new TablaConfig("est_cli", "Estados Cliente",    "GZZ_EST_CLI", "Referencial", "est_reg", "EstCliEstReg"),
+        new TablaConfig("lin_pro", "Líneas Proyecto",    "GZZ_LIN_PRO", "Referencial", "est_reg", "LinProEstRegCod"),
+        new TablaConfig("tip_pro", "Tipos Proyecto",     "GZZ_TIP_PRO", "Referencial", "est_reg", "TipProEstReg"),
+        new TablaConfig("est_pro", "Estados Proyecto",   "GZZ_EST_PRO", "Referencial", "est_reg", "EstProEstReg"),
+        new TablaConfig("car_per", "Cargos Personal",    "GZZ_CAR_PER", "Referencial", "est_reg", "CarPerEstReg"),
+        new TablaConfig("car_pro", "Cargos Proyecto",    "GZZ_CAR_PRO", "Referencial", "est_reg", "CarProEstReg"),
+        new TablaConfig("etp_pro", "Etapas Proyecto",    "GZZ_ETP_PRO", "Referencial", "est_reg", "EtpEstReg"),
         // Maestras
-        new TablaConfig("clientes", "Clientes",        "G1M_CLIENTES",   "Maestra",     null,      null),
-        new TablaConfig("cli_cred", "Clientes Crédito","G1M_CLI_CREDITO","Maestra",     "clientes","COD_CLI"),
-        new TablaConfig("empleados","Empleados",       "G1M_EMPLEADOS",  "Maestra",     null,      null),
+        new TablaConfig("clientes", "Clientes",          "G1M_CLIENTES", "Maestra", "tip_cli", "CliTipCod"),
+        new TablaConfig("personal", "Personal",          "G1M_PERSONAL", "Maestra", "car_per", "PerCarCod"),
         // Transacciones
-        new TablaConfig("proyectos","Proyectos",       "G2T_PROYECTOS",  "Transacción", "clientes","COD_CLI"),
-        new TablaConfig("tareas",   "Tareas",          "G3T_TAREAS",     "Transacción", "proyectos","COD_PRO"),
-        new TablaConfig("asignac",  "Asignaciones",    "G3T_ASIGNACION", "Transacción", "proyectos","COD_PRO"),
+        new TablaConfig("pro_cab", "Proyectos",          "G1T_PRO_CAB", "Transacción", "clientes", "ProCliCod"),
+        new TablaConfig("pro_eqp", "Equipo Proyecto",    "G1T_PRO_EQP", "Transacción", "pro_cab", "ProCliCod"),
+        new TablaConfig("pro_mov", "Movimientos Proyecto","G1T_PRO_MOV", "Transacción", "pro_eqp", "ProCliCod"),
+        // Detalle
+        new TablaConfig("per_car", "Personal-Cargo",     "G1C_PER_CAR", "Maestra", "personal", "PerCod"),
+    
     };
-
-    // ─── Estado de la aplicación ─────────────────────────────────────
     private Connection conn;
     private TablaConfig tablaActiva;
     private int filaSelMaestro  = -1;
     private int filaSelDetalle  = -1;
-
-    // Metadata
     private List<String>  colsMaestro  = new ArrayList<>();
     private List<String>  pksMaestro   = new ArrayList<>();
     private List<String>  colsDetalle  = new ArrayList<>();
     private List<String>  pksDetalle   = new ArrayList<>();
     private List<int[]>   tiposMaestro = new ArrayList<>(); // [tipoSql, nullable, autoInc]
     private List<int[]>   tiposDetalle = new ArrayList<>();
-
-    // ─── Componentes UI ──────────────────────────────────────────────
     private JPanel          panelNav;
     private JLabel          lblTitulo;
     private JTextField      txtBuscar;
@@ -105,7 +100,6 @@ public class SistemaProyectos extends JFrame {
     private JButton         btnNuevo, btnEditar, btnEliminar, btnRefresh;
     private Map<String, JButton> navButtons = new LinkedHashMap<>();
 
-    // ─── Constructor ─────────────────────────────────────────────────
     public SistemaProyectos() {
         setTitle("Sistema de Gestión – Control de Proyectos  |  BD26A · UNSA");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -283,11 +277,9 @@ public class SistemaProyectos extends JFrame {
         return btn;
     }
 
-    // ── Panel maestro ──────────────────────────────────────────────
     private JPanel buildPanelMaestro() {
         JPanel p = new JPanel(new BorderLayout());
         p.setBackground(Color.WHITE);
-
         lblEstadoMaestro = new JLabel(" ");
         lblEstadoMaestro.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 11));
         lblEstadoMaestro.setForeground(C_TEXT_SEC);
@@ -297,7 +289,6 @@ public class SistemaProyectos extends JFrame {
         lblEstadoMaestro.setBorder(BorderFactory.createCompoundBorder(
             BorderFactory.createMatteBorder(0, 0, 1, 0, C_BORDER),
             new EmptyBorder(5, 10, 5, 10)));
-
         modeloMaestro = new DefaultTableModel() {
             public boolean isCellEditable(int r, int c) { return false; }
         };
@@ -308,37 +299,31 @@ public class SistemaProyectos extends JFrame {
                 onSeleccionMaestro();
             }
         });
-
         p.add(lblEstadoMaestro, BorderLayout.NORTH);
         p.add(new JScrollPane(tablaMaestro), BorderLayout.CENTER);
         return p;
     }
 
-    // ── Panel detalle ──────────────────────────────────────────────
     private JPanel buildPanelDetalle() {
         JPanel p = new JPanel(new BorderLayout());
         p.setBackground(Color.WHITE);
-
         // Cabecera del panel detalle con botones propios
         JPanel hdr = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 6));
         hdr.setBackground(new Color(248, 251, 255));
         hdr.setBorder(BorderFactory.createMatteBorder(1, 0, 1, 0, C_BORDER));
-
         lblEstadoDetalle = new JLabel("↳ Seleccione un registro arriba");
         lblEstadoDetalle.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 11));
         lblEstadoDetalle.setForeground(C_ACCENT);
         hdr.add(lblEstadoDetalle);
-
-        JButton btnNuevoDet = makeBtn("+ Nuevo detalle", new Color(200, 225, 255), C_ACCENT);
-        JButton btnEditDet  = makeBtn("✎ Editar",        C_BTN_EDIT, C_TEXT_SEC);
-        JButton btnDelDet   = makeBtn("✕",               C_BTN_DEL,  new Color(163,45,45));
+        JButton btnNuevoDet = makeBtn("Nuevo detalle", new Color(200, 225, 255), C_ACCENT);
+        JButton btnEditDet  = makeBtn("Editar",        C_BTN_EDIT, C_TEXT_SEC);
+        JButton btnDelDet   = makeBtn("Eliminar",               C_BTN_DEL,  new Color(163,45,45));
         btnNuevoDet.addActionListener(e -> nuevoEnDetalle());
         btnEditDet.addActionListener(e  -> editarEnDetalle());
         btnDelDet.addActionListener(e   -> eliminarEnDetalle());
         hdr.add(btnNuevoDet);
         hdr.add(btnEditDet);
         hdr.add(btnDelDet);
-
         modeloDetalle = new DefaultTableModel() {
             public boolean isCellEditable(int r, int c) { return false; }
         };
@@ -374,7 +359,6 @@ public class SistemaProyectos extends JFrame {
         t.setShowGrid(false);
         t.setIntercellSpacing(new Dimension(0, 1));
         t.setGridColor(C_BORDER);
-
         JTableHeader th = t.getTableHeader();
         th.setBackground(C_HEADER_BG);
         th.setForeground(C_TEXT_SEC);
@@ -384,7 +368,6 @@ public class SistemaProyectos extends JFrame {
         return t;
     }
 
-    // ── Status bar ────────────────────────────────────────────────
     private JPanel buildStatusBar() {
         JPanel sb = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 4));
         sb.setBackground(C_STATUS_BG);
@@ -396,18 +379,24 @@ public class SistemaProyectos extends JFrame {
         return sb;
     }
 
-    // ═══════════════════════════════════════════════════════════════
-    //  LÓGICA DE DATOS
-    // ═══════════════════════════════════════════════════════════════
     private void conectar() {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
-            conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
-            lblStatusBar.setText("  BD: " + conn.getCatalog() + "  |  Usuario: " + DB_USER + "  |  Conectado ✓");
+
+            conn = getConnection();
+
+            lblStatusBar.setText(
+                "  BD: " + conn.getCatalog() +
+                "  |  Conectado "
+            );
+
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this,
+            JOptionPane.showMessageDialog(
+                this,
                 "No se pudo conectar a la base de datos:\n" + e.getMessage(),
-                "Error de Conexión", JOptionPane.ERROR_MESSAGE);
+                "Error de Conexión",
+                JOptionPane.ERROR_MESSAGE
+            );
         }
     }
 
@@ -417,15 +406,12 @@ public class SistemaProyectos extends JFrame {
         filaSelDetalle = -1;
         txtBuscar.setText("");
         lblTitulo.setText(tc.label + "  ·  " + tc.nombreFisico);
-
-        // Resaltar botón activo en sidebar
         navButtons.forEach((id, btn) -> {
             boolean activo = id.equals(tc.id);
             btn.setBackground(activo ? C_NAV_ACTIVE : C_SIDEBAR_BG);
             btn.setForeground(activo ? C_ACCENT : C_TEXT_SEC);
             btn.setFont(new Font(Font.SANS_SERIF, activo ? Font.BOLD : Font.PLAIN, 12));
         });
-
         cargarMetadata(tc.nombreFisico, colsMaestro, pksMaestro, tiposMaestro);
         cargarMaestro("");
         limpiarDetalle();
@@ -482,10 +468,8 @@ public class SistemaProyectos extends JFrame {
 
     private void onSeleccionMaestro() {
         if (filaSelMaestro < 0) { limpiarDetalle(); return; }
-        // ¿Existe tabla hija relacionada a la activa?
         TablaConfig hija = findHija(tablaActiva.id);
         if (hija == null) { limpiarDetalle(); return; }
-
         // Obtener valor de PK del maestro seleccionado
         if (pksMaestro.isEmpty()) return;
         int pkIdx = colsMaestro.indexOf(pksMaestro.get(0));
@@ -542,9 +526,6 @@ public class SistemaProyectos extends JFrame {
         lblStatusBar.setText("  " + msg);
     }
 
-    // ═══════════════════════════════════════════════════════════════
-    //  CRUD MAESTRO
-    // ═══════════════════════════════════════════════════════════════
     private void nuevoEnMaestro() {
         if (tablaActiva == null) return;
         String[] vals = pedirDatos("Nuevo registro — " + tablaActiva.label, colsMaestro, tiposMaestro, pksMaestro, null);
@@ -577,9 +558,6 @@ public class SistemaProyectos extends JFrame {
         limpiarDetalle();
     }
 
-    // ═══════════════════════════════════════════════════════════════
-    //  CRUD DETALLE
-    // ═══════════════════════════════════════════════════════════════
     private TablaConfig getTablaHijaActiva() {
         return tablaActiva != null ? findHija(tablaActiva.id) : null;
     }
@@ -625,9 +603,6 @@ public class SistemaProyectos extends JFrame {
         cargarDetalle(hija, hija.fkColumna, pkVal);
     }
 
-    // ═══════════════════════════════════════════════════════════════
-    //  SQL GENÉRICO
-    // ═══════════════════════════════════════════════════════════════
     private void ejecutarInsert(String tabla, List<String> cols, List<int[]> tipos, String[] vals) {
         List<Integer> idx = new ArrayList<>();
         for (int i = 0; i < tipos.size(); i++) if (tipos.get(i)[2] == 0) idx.add(i); // no auto-inc
@@ -710,9 +685,6 @@ public class SistemaProyectos extends JFrame {
         }
     }
 
-    // ═══════════════════════════════════════════════════════════════
-    //  DIÁLOGO DE DATOS
-    // ═══════════════════════════════════════════════════════════════
     private String[] pedirDatos(String titulo, List<String> cols, List<int[]> tipos, List<String> pks, String[] iniciales) {
         JPanel panel = new JPanel(new GridBagLayout());
         panel.setBackground(Color.WHITE);
@@ -726,14 +698,12 @@ public class SistemaProyectos extends JFrame {
             int[] t = tipos.get(i);
             boolean esPK = pks.contains(col);
             boolean esAI = t[2] == 1;
-
             gbc.gridx = 0; gbc.gridy = i; gbc.fill = GridBagConstraints.NONE; gbc.weightx = 0;
             String etq = col + (esPK ? " (PK)" : "") + (t[1]==0 ? " *" : "") + (esAI ? " [auto]" : "");
             JLabel lbl = new JLabel(etq);
             lbl.setFont(new Font(Font.SANS_SERIF, t[0]==Types.DATE?Font.ITALIC:Font.PLAIN, 12));
             lbl.setForeground(esPK ? C_ACCENT : Color.DARK_GRAY);
             panel.add(lbl, gbc);
-
             gbc.gridx = 1; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.weightx = 1;
             JTextField tf = new JTextField(22);
             tf.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 12));
@@ -743,15 +713,12 @@ public class SistemaProyectos extends JFrame {
             fields[i] = tf;
             panel.add(tf, gbc);
         }
-
         JScrollPane sp = new JScrollPane(panel);
         sp.setBorder(BorderFactory.createEmptyBorder());
         sp.setPreferredSize(new Dimension(440, Math.min(460, 60 + cols.size() * 38)));
-
         int op = JOptionPane.showConfirmDialog(this, sp, titulo,
             JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
         if (op != JOptionPane.OK_OPTION) return null;
-
         String[] res = new String[cols.size()];
         for (int i = 0; i < cols.size(); i++) res[i] = fields[i].getText().trim();
         return res;
@@ -770,9 +737,6 @@ public class SistemaProyectos extends JFrame {
         JOptionPane.showMessageDialog(this, msg, "Aviso", JOptionPane.INFORMATION_MESSAGE);
     }
 
-    // ═══════════════════════════════════════════════════════════════
-    //  MAIN
-    // ═══════════════════════════════════════════════════════════════
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             try { UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName()); }
