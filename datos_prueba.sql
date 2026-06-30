@@ -1,23 +1,124 @@
-USE gestionProyectos;
+-- 1. ESTADOS DE REGISTRO
+INSERT INTO GZZ_EST_REG VALUES ('A', 'Activo', 'A');
+INSERT INTO GZZ_EST_REG VALUES ('I', 'Inactivo', 'A');
+INSERT INTO GZZ_EST_REG VALUES ('E', 'Eliminado', 'A');
 
--- Tabla prerequisito: estados de registro
-INSERT IGNORE INTO GZZ_EST_REG (EstRegCod, EstRegDes, EstRegEstReg) VALUES
-  ('A', 'Activo',   'A'),
-  ('I', 'Inactivo', 'A'),
-  ('*', 'Eliminado','A');
+-- 2. TIPOS DE CLIENTE
+INSERT INTO GZZ_TIP_CLI VALUES ('EM', 'Empresa Privada', 'A');
+INSERT INTO GZZ_TIP_CLI VALUES ('ES', 'Entidad del Estado', 'A');
+INSERT INTO GZZ_TIP_CLI VALUES ('ON', 'ONG', 'A');
 
--- Datos de prueba para GZZ_TIP_PRO
--- TipProTam: P=Pequeño, M=Mediano, G=Grande
-INSERT INTO GZZ_TIP_PRO (TipProCod, TipProDes, TipProTam, TipProEstReg) VALUES
-  (1,  'Desarrollo de Software',          'G', 'A'),
-  (2,  'Consultoría Empresarial',         'M', 'A'),
-  (3,  'Implementación de Sistemas',      'G', 'A'),
-  (4,  'Mantenimiento de Aplicaciones',   'P', 'A'),
-  (5,  'Auditoría de Sistemas',           'M', 'A'),
-  (6,  'Migración de Datos',              'M', 'A'),
-  (7,  'Integración de Plataformas',      'G', 'A'),
-  (8,  'Soporte Técnico',                 'P', 'A'),
-  (9,  'Análisis de Requerimientos',      'P', 'A'),
-  (10, 'Capacitación y Formación',        'P', 'A');
+-- 3. ESTADOS DE CLIENTE
+INSERT INTO GZZ_EST_CLI VALUES ('A', 'Activo', 'A');
+INSERT INTO GZZ_EST_CLI VALUES ('I', 'Inactivo', 'A');
+INSERT INTO GZZ_EST_CLI VALUES ('S', 'Suspendido', 'A');
 
-SELECT TipProCod, TipProDes, TipProTam, TipProEstReg FROM GZZ_TIP_PRO ORDER BY TipProCod;
+-- 4. LÍNEAS DE PROYECTO
+INSERT INTO GZZ_LIN_PRO VALUES (1, 'Desarrollo de Software a Medida', 'G', 'A');
+INSERT INTO GZZ_LIN_PRO VALUES (2, 'Consultoría TI', 'M', 'A');
+INSERT INTO GZZ_LIN_PRO VALUES (3, 'Mantenimiento de Sistemas', 'P', 'A');
+
+-- 5. TIPOS DE PROYECTO
+INSERT INTO GZZ_TIP_PRO VALUES (1, 'Desarrollo Web', 'G', 'A');
+INSERT INTO GZZ_TIP_PRO VALUES (2, 'Aplicación Móvil', 'M', 'A');
+INSERT INTO GZZ_TIP_PRO VALUES (3, 'Sistema de Escritorio', 'P', 'A');
+INSERT INTO GZZ_TIP_PRO VALUES (4, 'Consultoría', 'P', 'A');
+
+-- 6. ESTADOS DE PROYECTO
+INSERT INTO GZZ_EST_PRO VALUES ('PE', 'Pendiente', 'A');
+INSERT INTO GZZ_EST_PRO VALUES ('AC', 'En Ejecución', 'A');
+INSERT INTO GZZ_EST_PRO VALUES ('CE', 'Cerrado', 'A');
+INSERT INTO GZZ_EST_PRO VALUES ('CA', 'Cancelado', 'A');
+
+-- 7. CARGOS DE PERSONAL
+INSERT INTO GZZ_CAR_PER VALUES (1, 'Gerente de Proyectos', 'A');
+INSERT INTO GZZ_CAR_PER VALUES (2, 'Analista de Sistemas', 'A');
+INSERT INTO GZZ_CAR_PER VALUES (3, 'Desarrollador Backend', 'A');
+INSERT INTO GZZ_CAR_PER VALUES (4, 'Desarrollador Frontend', 'A');
+INSERT INTO GZZ_CAR_PER VALUES (5, 'Tester QA', 'A');
+
+-- 8. CARGOS DE PROYECTO
+INSERT INTO GZZ_CAR_PRO VALUES (1, 'Jefe de Proyecto', 'A');
+INSERT INTO GZZ_CAR_PRO VALUES (2, 'Analista', 'A');
+INSERT INTO GZZ_CAR_PRO VALUES (3, 'Programador', 'A');
+INSERT INTO GZZ_CAR_PRO VALUES (4, 'Tester', 'A');
+
+-- 9. ETAPAS DE PROYECTO
+INSERT INTO GZZ_ETP_PRO VALUES (1, 'Levantamiento de Requerimientos', 10.00, 'A');
+INSERT INTO GZZ_ETP_PRO VALUES (2, 'Análisis y Diseño', 20.00, 'A');
+INSERT INTO GZZ_ETP_PRO VALUES (3, 'Desarrollo', 40.00, 'A');
+INSERT INTO GZZ_ETP_PRO VALUES (4, 'Pruebas', 15.00, 'A');
+INSERT INTO GZZ_ETP_PRO VALUES (5, 'Despliegue y Entrega', 10.00, 'A');
+INSERT INTO GZZ_ETP_PRO VALUES (6, 'Mantenimiento Post-Entrega', 5.00, 'A');
+
+-- 10. CLIENTES
+INSERT INTO G1M_CLIENTES VALUES (1, 'Municipalidad Provincial de Arequipa', 'ES', '2020-03-15', NULL, '2024-11-10', 'A', 'A');
+INSERT INTO G1M_CLIENTES VALUES (2, 'Corporación Aceros Arequipa S.A.', 'EM', '2019-07-01', NULL, '2025-01-20', 'A', 'A');
+INSERT INTO G1M_CLIENTES VALUES (3, 'Universidad Nacional de San Agustín', 'ES', '2021-01-10', NULL, '2024-08-05', 'A', 'A');
+INSERT INTO G1M_CLIENTES VALUES (4, 'Clínica San Juan de Dios', 'EM', '2022-05-20', NULL, NULL, 'A', 'A');
+INSERT INTO G1M_CLIENTES VALUES (5, 'ONG Sembrando Futuro', 'ON', '2023-02-14', NULL, NULL, 'A', 'A');
+INSERT INTO G1M_CLIENTES VALUES (6, 'Gobierno Regional de Arequipa', 'ES', '2018-09-01', NULL, '2023-12-15', 'A', 'A');
+INSERT INTO G1M_CLIENTES VALUES (7, 'Tiendas EFE S.A.C.', 'EM', '2020-11-30', NULL, '2024-06-01', 'A', 'A');
+INSERT INTO G1M_CLIENTES VALUES (8, 'Saga Falabella Perú S.A.', 'EM', '2021-04-22', NULL, NULL, 'I', 'A');
+INSERT INTO G1M_CLIENTES VALUES (9, 'Ministerio de Educación', 'ES', '2019-03-05', NULL, '2025-02-28', 'A', 'A');
+INSERT INTO G1M_CLIENTES VALUES (10, 'Fundación Yachay', 'ON', '2023-08-17', NULL, NULL, 'A', 'A');
+
+-- 11. PERSONAL
+INSERT INTO G1M_PERSONAL VALUES (1, 'Carlos Mendoza Quispe',    1, 85.00, '2018-01-15', 'A');
+INSERT INTO G1M_PERSONAL VALUES (2, 'Ana Flores Huanca',        2, 60.00, '2019-03-10', 'A');
+INSERT INTO G1M_PERSONAL VALUES (3, 'Luis Torres Mamani',       3, 45.00, '2020-06-01', 'A');
+INSERT INTO G1M_PERSONAL VALUES (4, 'María Ramos Cáceres',      4, 42.00, '2020-08-15', 'A');
+INSERT INTO G1M_PERSONAL VALUES (5, 'Jorge Chávez Apaza',       5, 35.00, '2021-01-20', 'A');
+INSERT INTO G1M_PERSONAL VALUES (6, 'Patricia Salas Condori',   2, 58.00, '2019-11-05', 'A');
+INSERT INTO G1M_PERSONAL VALUES (7, 'Roberto Díaz Vargas',      3, 47.00, '2021-04-12', 'A');
+INSERT INTO G1M_PERSONAL VALUES (8, 'Lucía Paredes Ochoa',      4, 43.00, '2022-02-28', 'A');
+INSERT INTO G1M_PERSONAL VALUES (9, 'Miguel Ángel Soto',        1, 90.00, '2017-07-01', 'A');
+INSERT INTO G1M_PERSONAL VALUES (10,'Sandra Vega Lazo',         5, 36.00, '2022-09-14', 'A');
+
+-- 12. PERSONAL-CARGO (G1C_PER_CAR)
+INSERT INTO G1C_PER_CAR VALUES (1, 1, 'A');
+INSERT INTO G1C_PER_CAR VALUES (2, 2, 'A');
+INSERT INTO G1C_PER_CAR VALUES (3, 3, 'A');
+INSERT INTO G1C_PER_CAR VALUES (4, 3, 'A');
+INSERT INTO G1C_PER_CAR VALUES (5, 4, 'A');
+INSERT INTO G1C_PER_CAR VALUES (6, 2, 'A');
+INSERT INTO G1C_PER_CAR VALUES (7, 3, 'A');
+INSERT INTO G1C_PER_CAR VALUES (8, 3, 'A');
+INSERT INTO G1C_PER_CAR VALUES (9, 1, 'A');
+INSERT INTO G1C_PER_CAR VALUES (10, 4, 'A');
+
+-- 13. PROYECTOS (G1T_PRO_CAB)
+INSERT INTO G1T_PRO_CAB VALUES (1, 1, 1, '2023-01-10', '2023-02-01', '2023-02-15', '2023-08-15', '2023-09-01', 45000.00, 43500.00, 30000.00, 29000.00, 5000.00, 4800.00, 10000.00, 9700.00, 'CE', 'A');
+INSERT INTO G1T_PRO_CAB VALUES (2, 1, 1, '2023-03-05', '2023-04-01', '2023-04-10', '2023-10-10', NULL,         62000.00, 61000.00, 40000.00, 39500.00, 7000.00, 6900.00, 15000.00, 14600.00,'AC', 'A');
+INSERT INTO G1T_PRO_CAB VALUES (3, 2, 1, '2023-06-20', '2023-07-15', '2023-07-20', '2024-01-20', '2024-02-01', 28000.00, 27500.00, 18000.00, 17800.00, 3000.00, 2900.00, 7000.00,  6800.00, 'CE', 'A');
+INSERT INTO G1T_PRO_CAB VALUES (4, 3, 1, '2024-01-08', '2024-02-01', '2024-02-10', '2024-07-10', NULL,         35000.00, 34000.00, 22000.00, 21500.00, 4000.00, 3900.00, 9000.00,  8600.00, 'AC', 'A');
+INSERT INTO G1T_PRO_CAB VALUES (5, 2, 1, '2024-03-12', '2024-04-01', '2024-04-05', '2024-09-05', NULL,         50000.00, 49000.00, 32000.00, 31000.00, 6000.00, 5800.00, 12000.00, 12200.00,'AC', 'A');
+INSERT INTO G1T_PRO_CAB VALUES (6, 1, 1, '2023-09-01', '2023-10-01', '2023-10-15', '2024-04-15', '2024-05-01', 40000.00, 39000.00, 26000.00, 25500.00, 4500.00, 4400.00, 9500.00,  9100.00, 'CE', 'A');
+INSERT INTO G1T_PRO_CAB VALUES (7, 4, 1, '2024-05-20', '2024-06-15', '2024-06-20', '2024-12-20', NULL,         22000.00, NULL,      14000.00, NULL,      2500.00, NULL,    5500.00,  NULL,    'AC', 'A');
+INSERT INTO G1T_PRO_CAB VALUES (8, 1, 1, '2024-07-10', '2024-08-01', '2024-08-15', '2025-02-15', NULL,         75000.00, NULL,      48000.00, NULL,      8000.00, NULL,    19000.00, NULL,    'PE', 'A');
+INSERT INTO G1T_PRO_CAB VALUES (9, 3, 1, '2023-11-01', '2023-12-01', '2023-12-10', '2024-06-10', '2024-07-01', 31000.00, 30500.00, 20000.00, 19800.00, 3500.00, 3400.00, 7500.00,  7300.00, 'CE', 'A');
+INSERT INTO G1T_PRO_CAB VALUES (10,2, 1, '2024-09-05', '2024-10-01', '2024-10-10', '2025-04-10', NULL,         55000.00, NULL,      35000.00, NULL,      6500.00, NULL,    13500.00, NULL,    'AC', 'A');
+
+-- 14. EQUIPO DE PROYECTO (G1T_PRO_EQP)
+INSERT INTO G1T_PRO_EQP VALUES (1,1,1, 1,1, 'A');
+INSERT INTO G1T_PRO_EQP VALUES (1,1,1, 2,2, 'A');
+INSERT INTO G1T_PRO_EQP VALUES (1,1,1, 3,3, 'A');
+INSERT INTO G1T_PRO_EQP VALUES (2,1,1, 9,1, 'A');
+INSERT INTO G1T_PRO_EQP VALUES (2,1,1, 6,2, 'A');
+INSERT INTO G1T_PRO_EQP VALUES (2,1,1, 7,3, 'A');
+INSERT INTO G1T_PRO_EQP VALUES (3,2,1, 1,1, 'A');
+INSERT INTO G1T_PRO_EQP VALUES (3,2,1, 4,3, 'A');
+INSERT INTO G1T_PRO_EQP VALUES (4,3,1, 9,1, 'A');
+INSERT INTO G1T_PRO_EQP VALUES (4,3,1, 3,3, 'A');
+
+-- 15. MOVIMIENTOS DE PROYECTO (G1T_PRO_MOV)
+INSERT INTO G1T_PRO_MOV VALUES (1,1,1, 1,1, 1,1, '2023-02-15', 8,  0,  'A');
+INSERT INTO G1T_PRO_MOV VALUES (1,1,1, 1,1, 2,1, '2023-03-01', 16, 0,  'A');
+INSERT INTO G1T_PRO_MOV VALUES (1,1,1, 2,2, 2,1, '2023-03-05', 20, 0,  'A');
+INSERT INTO G1T_PRO_MOV VALUES (1,1,1, 3,3, 3,1, '2023-04-01', 40, 30, 'A');
+INSERT INTO G1T_PRO_MOV VALUES (2,1,1, 9,1, 1,1, '2023-04-10', 8,  0,  'A');
+INSERT INTO G1T_PRO_MOV VALUES (2,1,1, 6,2, 2,1, '2023-05-01', 18, 0,  'A');
+INSERT INTO G1T_PRO_MOV VALUES (3,2,1, 1,1, 1,1, '2023-07-20', 8,  0,  'A');
+INSERT INTO G1T_PRO_MOV VALUES (3,2,1, 4,3, 3,1, '2023-08-15', 35, 0,  'A');
+INSERT INTO G1T_PRO_MOV VALUES (4,3,1, 9,1, 1,1, '2024-02-10', 8,  0,  'A');
+INSERT INTO G1T_PRO_MOV VALUES (4,3,1, 3,3, 3,1, '2024-03-01', 32, 0,  'A');
