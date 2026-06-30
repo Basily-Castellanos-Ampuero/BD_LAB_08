@@ -10,3 +10,14 @@ FROM G1M_PERSONAL p
 JOIN GZZ_CAR_PER  cp ON p.PerCarCod = cp.CarPerCod
 JOIN GZZ_EST_REG  er ON p.PerEstReg = er.EstRegCod;
 SELECT * FROM VI_PERSONAL_COMPLETO;
+
+CREATE OR REPLACE VIEW VI_CLIENTES_TIPO AS
+SELECT 
+    c.CliCod      AS 'Código',
+    c.CliNom      AS 'Cliente',
+    tc.TipCliDes  AS 'Tipo',
+    c.CliFecIng   AS 'Fecha Ingreso',
+    c.CliFecCes   AS 'Fecha Cese'
+FROM G1M_CLIENTES c
+JOIN GZZ_TIP_CLI  tc ON c.CliTipCod = tc.TipCliCod;
+SELECT * FROM VI_CLIENTES_TIPO;
