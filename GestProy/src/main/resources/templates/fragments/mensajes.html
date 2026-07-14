@@ -1,0 +1,10 @@
+<div th:fragment="alertas" xmlns:th="http://www.thymeleaf.org">
+  <div th:if="${exito}" class="alert alert-success alert-dismissible fade show" role="alert">
+    <span th:text="${exito}">Operación exitosa</span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+  <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+    <span th:text="${error}">Error</span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+</div>

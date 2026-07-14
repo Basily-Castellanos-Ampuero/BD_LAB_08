@@ -1,0 +1,14 @@
+/* GestProy — estilos propios sobre Bootstrap */
+
+.tabla-mantenimiento td,
+.tabla-mantenimiento th {
+  vertical-align: middle;
+}
+
+.form-mantenimiento {
+  max-width: 640px;
+}
+
+.progress {
+  min-width: 120px;
+}

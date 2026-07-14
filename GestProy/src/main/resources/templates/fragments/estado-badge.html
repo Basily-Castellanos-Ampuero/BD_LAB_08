@@ -1,0 +1,5 @@
+<th:block th:fragment="badge(valor)" xmlns:th="http://www.thymeleaf.org">
+  <span th:if="${valor} == 'A'" class="badge bg-success">Activo</span>
+  <span th:if="${valor} == 'I'" class="badge bg-warning text-dark">Inactivo</span>
+  <span th:if="${valor} == '*'" class="badge bg-danger">Eliminado</span>
+</th:block>

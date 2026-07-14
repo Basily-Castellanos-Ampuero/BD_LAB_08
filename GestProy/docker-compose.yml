@@ -1,0 +1,61 @@
+# ============================================================
+#  GestProy — orquestación Docker (app + PostgreSQL)
+#
+#  Uso en cualquier máquina con Docker:
+#    docker compose up --build
+#  Luego abrir http://localhost:8080
+#
+#  Config sensible (contraseña de BD, secreto JWT) se lee de un
+#  archivo .env opcional (ver .env.example). Si no existe, se usan
+#  los valores por defecto de abajo — cámbialos para cualquier uso
+#  que no sea local/de prueba.
+# ============================================================
+
+services:
+
+  # ---- Base de datos PostgreSQL 16 ----
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: gestion_proyectos
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-gestproy}
+    volumes:
+      # Datos persistentes: sobreviven a `docker compose down`
+      # (pero NO a `docker compose down -v`).
+      - pgdata:/var/lib/postgresql/data
+      # Scripts SQL del proyecto (solo lectura) + inicializador.
+      # El init corre una única vez, en la primera creación del volumen.
+      - ./db:/gestproy-db:ro
+      - ./docker/initdb.sh:/docker-entrypoint-initdb.d/00-gestproy-init.sh:ro
+    healthcheck:
+      # La app espera a que la BD esté lista Y con los scripts aplicados:
+      # durante la inicialización, Postgres no acepta conexiones externas.
+      test: ["CMD-SHELL", "pg_isready -U postgres -d gestion_proyectos"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  # ---- Aplicación Spring Boot ----
+  app:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # Spring Boot mapea estas variables a spring.datasource.* / app.jwt.*
+      # (binding relajado), así no hace falta db.properties en el contenedor.
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/gestion_proyectos
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-gestproy}
+      APP_JWT_SECRET: ${APP_JWT_SECRET:-ZqakngtbYv6vRGbyHXP5jRYm4NwLppJY88EDXJMl+9nbhR0Dv/pj+nDG4ux2Xfjl}
+      # HTTP local: las cookies de sesión no llevan el flag Secure.
+      # Poner "true" solo detrás de HTTPS.
+      APP_JWT_COOKIE_SECURE: "false"
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+
+volumes:
+  pgdata:

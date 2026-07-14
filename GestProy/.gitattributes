@@ -1,0 +1,4 @@
+# Los scripts de shell DEBEN conservar finales de línea LF aunque se
+# clonen en Windows: con CRLF, bash dentro del contenedor Linux falla.
+*.sh text eol=lf
+docker/initdb.sh text eol=lf

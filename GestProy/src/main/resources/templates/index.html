@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Inicio')}"></head>
+<body>
+<nav th:replace="~{fragments/nav :: nav}"></nav>
+<div class="container">
+  <div th:replace="~{fragments/mensajes :: alertas}"></div>
+
+  <h1 class="mb-4">Sistema de Gestión de Proyectos</h1>
+
+  <div class="row g-3">
+    <div class="col-md-4">
+      <div class="card text-center">
+        <div class="card-body">
+          <h2 class="card-title" th:text="${totalProyectos}">0</h2>
+          <p class="card-text">Proyectos activos</p>
+          <a th:href="@{/proyectos}" class="btn btn-primary btn-sm">Ver proyectos</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card text-center">
+        <div class="card-body">
+          <h2 class="card-title" th:text="${totalClientes}">0</h2>
+          <p class="card-text">Clientes activos</p>
+          <a th:href="@{/clientes}" class="btn btn-primary btn-sm">Ver clientes</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card text-center">
+        <div class="card-body">
+          <h2 class="card-title" th:text="${totalPersonal}">0</h2>
+          <p class="card-text">Personal activo</p>
+          <a th:href="@{/personal}" class="btn btn-primary btn-sm">Ver personal</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

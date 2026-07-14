@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Cliente')}"></head>
+<body>
+<nav th:replace="~{fragments/nav :: nav}"></nav>
+<div class="container">
+  <div th:replace="~{fragments/mensajes :: alertas}"></div>
+
+  <h1 th:text="${esEdicion} ? 'Modificar Cliente' : 'Adicionar Cliente'">Cliente</h1>
+
+  <form class="form-mantenimiento mt-3" method="post"
+        th:action="${esEdicion} ? @{/clientes/{c}(c=${cliente.cod})} : @{/clientes}"
+        th:object="${cliente}">
+
+    <div class="mb-3">
+      <label class="form-label">Código</label>
+      <input th:field="*{cod}" type="number" class="form-control" th:readonly="${esEdicion}" required>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Nombre / Razón social</label>
+      <input th:field="*{nom}" class="form-control" maxlength="60" required>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Tipo de cliente</label>
+      <select th:field="*{tipCod}" class="form-select" required>
+        <option value="">— Seleccione —</option>
+        <option th:each="t : ${tiposCliente}" th:value="${t.cod}" th:text="${t.cod} + ' — ' + ${t.des}"></option>
+      </select>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Estado del cliente</label>
+      <select th:field="*{estCod}" class="form-select" required>
+        <option value="">— Seleccione —</option>
+        <option th:each="e : ${estadosCliente}" th:value="${e.cod}" th:text="${e.cod} + ' — ' + ${e.des}"></option>
+      </select>
+    </div>
+
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Fecha de ingreso</label>
+        <input th:field="*{fecIng}" type="date" class="form-control">
+      </div>
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Fecha de cese</label>
+        <input th:field="*{fecCes}" type="date" class="form-control">
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-success">Actualizar</button>
+    <a th:href="@{/clientes}" class="btn btn-secondary">Cancelar</a>
+  </form>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

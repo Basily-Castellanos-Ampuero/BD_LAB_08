@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Detalle de Proyecto')}"></head>
+<body>
+<nav th:replace="~{fragments/nav :: nav}"></nav>
+<div class="container">
+  <div th:replace="~{fragments/mensajes :: alertas}"></div>
+
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>
+      Proyecto
+      <span th:text="${proyecto.cliCod} + '-' + ${proyecto.tipCod} + '-' + ${proyecto.sec}">1001-1-1</span>
+    </h1>
+    <div>
+      <a th:if="${admin}"
+         th:href="@{/proyectos/{c}/{t}/{s}/editar(c=${proyecto.cliCod},t=${proyecto.tipCod},s=${proyecto.sec})}"
+         class="btn btn-outline-primary">Modificar</a>
+      <a th:href="@{/proyectos/{c}/{t}/{s}/equipo(c=${proyecto.cliCod},t=${proyecto.tipCod},s=${proyecto.sec})}"
+         class="btn btn-outline-secondary">Equipo</a>
+      <a th:href="@{/proyectos/{c}/{t}/{s}/avance(c=${proyecto.cliCod},t=${proyecto.tipCod},s=${proyecto.sec})}"
+         class="btn btn-outline-success">Avance</a>
+      <a th:href="@{/proyectos}" class="btn btn-secondary">Volver</a>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-6">
+      <div class="card mb-3">
+        <div class="card-header">Datos generales</div>
+        <div class="card-body">
+          <dl class="row mb-0">
+            <dt class="col-sm-5">Cliente</dt>
+            <dd class="col-sm-7" th:text="${proyecto.cliCod} + ' — ' + ${proyecto.clienteNombre}">Cliente</dd>
+            <dt class="col-sm-5">Tipo de proyecto</dt>
+            <dd class="col-sm-7" th:text="${proyecto.tipoDescripcion}">Tipo</dd>
+            <dt class="col-sm-5">Estado</dt>
+            <dd class="col-sm-7">
+              <span class="badge bg-info text-dark" th:text="${proyecto.estadoDescripcion}">Estado</span>
+              <th:block th:replace="~{fragments/estado-badge :: badge(${proyecto.estReg})}"/>
+            </dd>
+            <dt class="col-sm-5">Fecha de contrato</dt>
+            <dd class="col-sm-7" th:text="${proyecto.fecCon} ?: '—'">—</dd>
+            <dt class="col-sm-5">Fecha pactada</dt>
+            <dd class="col-sm-7" th:text="${proyecto.fecPac} ?: '—'">—</dd>
+            <dt class="col-sm-5">Fecha de inicio</dt>
+            <dd class="col-sm-7" th:text="${proyecto.fecIni} ?: '—'">—</dd>
+            <dt class="col-sm-5">Fecha de entrega</dt>
+            <dd class="col-sm-7" th:text="${proyecto.fecEnt} ?: '—'">—</dd>
+            <dt class="col-sm-5">Fecha de cierre</dt>
+            <dd class="col-sm-7" th:text="${proyecto.fecCer} ?: '—'">—</dd>
+          </dl>
+        </div>
+      </div>
+
+      <div class="card mb-3" th:if="${admin}">
+        <div class="card-header">Cambiar estado</div>
+        <div class="card-body">
+          <form class="row g-2"
+                th:action="@{/proyectos/{c}/{t}/{s}/estado(c=${proyecto.cliCod},t=${proyecto.tipCod},s=${proyecto.sec})}"
+                method="post">
+            <div class="col-8">
+              <select name="nuevoEstado" class="form-select" required>
+                <option value="">— Nuevo estado —</option>
+                <option th:each="e : ${estadosProyecto}" th:value="${e.cod}"
+                        th:text="${e.cod} + ' — ' + ${e.des}"
+                        th:disabled="${e.cod == proyecto.estCod}"></option>
+              </select>
+            </div>
+            <div class="col-4">
+              <button type="submit" class="btn btn-success w-100">Actualizar</button>
+            </div>
+            <small class="text-muted">
+              Las transiciones inválidas las rechaza la base de datos
+              (planificado → ejecución → entregado → cerrado; suspensión desde
+              planificado o ejecución).
+            </small>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card mb-3">
+        <div class="card-header">Montos (S/)</div>
+        <div class="card-body">
+          <table class="table table-sm mb-0">
+            <thead>
+              <tr><th></th><th class="text-end">Presupuestado</th><th class="text-end">Real</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Monto (ingreso)</td>
+                <td class="text-end" th:text="${proyecto.monPre != null} ? ${#numbers.formatDecimal(proyecto.monPre,1,2)} : '—'">—</td>
+                <td class="text-end" th:text="${proyecto.monRea != null} ? ${#numbers.formatDecimal(proyecto.monRea,1,2)} : '—'">—</td>
+              </tr>
+              <tr>
+                <td>Costo</td>
+                <td class="text-end" th:text="${proyecto.cosPre != null} ? ${#numbers.formatDecimal(proyecto.cosPre,1,2)} : '—'">—</td>
+                <td class="text-end" th:text="${proyecto.cosRea != null} ? ${#numbers.formatDecimal(proyecto.cosRea,1,2)} : '—'">—</td>
+              </tr>
+              <tr>
+                <td>Gasto</td>
+                <td class="text-end" th:text="${proyecto.gasPre != null} ? ${#numbers.formatDecimal(proyecto.gasPre,1,2)} : '—'">—</td>
+                <td class="text-end" th:text="${proyecto.gasRea != null} ? ${#numbers.formatDecimal(proyecto.gasRea,1,2)} : '—'">—</td>
+              </tr>
+              <tr class="table-active">
+                <td><strong>Utilidad</strong></td>
+                <td class="text-end"><strong th:text="${proyecto.utiPre != null} ? ${#numbers.formatDecimal(proyecto.utiPre,1,2)} : '—'">—</strong></td>
+                <td class="text-end"><strong th:text="${proyecto.utiRea != null} ? ${#numbers.formatDecimal(proyecto.utiRea,1,2)} : '—'">—</strong></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">Equipo asignado</div>
+        <div class="card-body">
+          <p th:if="${#lists.isEmpty(equipo)}" class="text-muted mb-0">Sin personal asignado.</p>
+          <ul class="list-group list-group-flush" th:unless="${#lists.isEmpty(equipo)}">
+            <li class="list-group-item d-flex justify-content-between" th:each="m : ${equipo}">
+              <span th:text="${m.perNom} + ' — ' + ${m.carProDes}">Persona — Cargo</span>
+              <span class="badge"
+                    th:classappend="${m.estReg == 'A'} ? 'bg-success' : 'bg-secondary'"
+                    th:text="${m.estadoDescripcion}">Activo</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

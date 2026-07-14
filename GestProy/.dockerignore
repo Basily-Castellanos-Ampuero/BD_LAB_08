@@ -1,0 +1,35 @@
+# Lo que NO debe entrar al contexto de build de la imagen.
+# Mantiene el build rápido y evita filtrar secretos o basura local.
+
+# Compilados / build local (la imagen recompila desde cero)
+target/
+*.class
+
+# Credenciales locales — nunca deben entrar a la imagen
+db.properties
+.env
+
+# Documentación (no la necesita la app en runtime)
+docs/
+
+# Control de versiones e IDEs
+.git/
+.gitignore
+.gitattributes
+.idea/
+*.iml
+.vscode/
+nbproject/
+.settings/
+*.project
+*.classpath
+
+# Artefactos Docker (no se copian dentro de la imagen de la app)
+Dockerfile
+.dockerignore
+docker-compose.yml
+docker/
+
+# Sistema operativo
+Thumbs.db
+.DS_Store

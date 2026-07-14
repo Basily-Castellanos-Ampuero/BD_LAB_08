@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Personal')}"></head>
+<body>
+<nav th:replace="~{fragments/nav :: nav}"></nav>
+<div class="container">
+  <div th:replace="~{fragments/mensajes :: alertas}"></div>
+
+  <h1 th:text="${esEdicion} ? 'Modificar Personal' : 'Adicionar Personal'">Personal</h1>
+
+  <form class="form-mantenimiento mt-3" method="post"
+        th:action="${esEdicion} ? @{/personal/{c}(c=${persona.cod})} : @{/personal}"
+        th:object="${persona}">
+
+    <div class="mb-3">
+      <label class="form-label">Código</label>
+      <input th:field="*{cod}" type="number" class="form-control" th:readonly="${esEdicion}" required>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Nombre completo</label>
+      <input th:field="*{nom}" class="form-control" maxlength="60" required>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Cargo (planilla)</label>
+      <select th:field="*{carCod}" class="form-select" required>
+        <option value="">— Seleccione —</option>
+        <option th:each="c : ${cargosPersonal}" th:value="${c.cod}" th:text="${c.cod} + ' — ' + ${c.des}"></option>
+      </select>
+    </div>
+
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Costo por hora (S/)</label>
+        <input th:field="*{cosHor}" type="number" step="0.01" min="0.01" class="form-control" required>
+      </div>
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Fecha de ingreso</label>
+        <input th:field="*{fecIng}" type="date" class="form-control" required>
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-success">Actualizar</button>
+    <a th:href="@{/personal}" class="btn btn-secondary">Cancelar</a>
+  </form>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

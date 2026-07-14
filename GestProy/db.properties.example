@@ -1,0 +1,14 @@
+# ============================================================
+#  Plantilla de credenciales de la base de datos — GestProy
+#  Copia este archivo como "db.properties" (en este mismo
+#  directorio GestProy/) y completa tus credenciales locales.
+#  "db.properties" está en .gitignore: NUNCA se sube al repo.
+# ============================================================
+spring.datasource.url=jdbc:postgresql://localhost:5432/gestion_proyectos
+spring.datasource.username=postgres
+spring.datasource.password=TU_CONTRASENA
+
+# Clave de firma de los JWT de la cuenta admin (HMAC-SHA256).
+# Genera una propia de al menos 32 caracteres aleatorios, por ejemplo con:
+#   openssl rand -base64 48
+app.jwt.secret=CAMBIA_ESTA_CLAVE_POR_UNA_ALEATORIA_DE_AL_MENOS_32_CARACTERES
