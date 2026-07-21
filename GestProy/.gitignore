@@ -2,9 +2,6 @@
 db.properties
 .env
 
-# Documentación local, no versionada a propósito
-docs/
-
 # Build de Maven
 target/
 
